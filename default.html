@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BlabberLedger</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --paper: #EDE6D3;
+    --paper-dark: #E3DAC2;
+    --ink: #20291F;
+    --cover: #223A30;
+    --cover-dark: #16261F;
+    --rule-red: #A63D2F;
+    --accent-blue: #34527A;
+    --paper-line: #C9BFA0;
+    --stamp-green: #3F6B4E;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--cover-dark);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+  }
+
+  .cover-bar{
+    background: linear-gradient(180deg, var(--cover) 0%, var(--cover-dark) 100%);
+    padding: 22px 32px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom: 3px solid #0f1c15;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .cover-title{
+    font-family:'Spectral', serif;
+    font-weight:700;
+    font-size: 26px;
+    color: var(--paper);
+    letter-spacing: 0.5px;
+  }
+  .cover-title .no{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #9db3a4;
+    display:block;
+    font-weight:400;
+    letter-spacing: 1px;
+    margin-top:2px;
+  }
+  .cover-sub{
+    font-family:'Inter', sans-serif;
+    font-size: 13px;
+    color: #b9c9bd;
+    max-width: 420px;
+    text-align:right;
+    line-height:1.4;
+  }
+
+  .book{
+    display:grid;
+    grid-template-columns: 1fr 8px 1.4fr;
+    gap:0;
+    max-width: 1400px;
+    margin: 28px auto;
+    min-height: 640px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  @media (max-width: 900px){
+    .book{ grid-template-columns: 1fr; }
+    .spine{ display:none; }
+  }
+
+  .spine{
+    background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(0,0,0,0.05), rgba(0,0,0,0.25));
+  }
+
+  .page{
+    background: var(--paper);
+    padding: 28px 30px;
+    position:relative;
+  }
+  .page.left{
+    display:flex;
+    flex-direction:column;
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 32px;
+    background-position: 0 92px;
+  }
+  .page.left::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0;
+    left: 58px;
+    width: 2px;
+    background: var(--rule-red);
+    opacity:0.55;
+  }
+
+  .page-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--rule-red);
+    margin-bottom: 4px;
+  }
+  .section-header{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--rule-red);
+    margin-bottom: 16px;
+  }
+  .page.left .section-header{ padding-left: 30px; }
+  #chatlog{
+    padding-left: 30px;
+    min-height: 120px;
+    max-height: 300px;
+    overflow-y:auto;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  .entry-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 14px;
+    line-height: 32px;
+    color: var(--ink);
+    border-bottom: none;
+    white-space: pre-wrap;
+    display:flex;
+    gap:8px;
+    animation: dropin 0.25s ease;
+  }
+  .entry-line .idx{ color: var(--rule-red); opacity:0.6; font-size:12px; width:18px; flex-shrink:0; }
+  @keyframes dropin{ from{ opacity:0; transform: translateY(-4px);} to{opacity:1; transform:translateY(0);} }
+
+  .input-row{
+    padding-left: 30px;
+    display:flex;
+    gap:8px;
+    margin-top: 20px;
+  }
+  textarea#lineInput{
+    flex:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 14px;
+    line-height: 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--paper-line);
+    resize:none;
+    height: 44px;
+    padding: 8px 4px;
+    color: var(--ink);
+    outline:none;
+  }
+  textarea#lineInput:focus{ border-bottom-color: var(--accent-blue); }
+  textarea#lineInput::placeholder{ color:#8d846a; }
+
+  button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size: 13px;
+    border:none;
+    cursor:pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+  button:hover{ opacity:0.88; }
+  button:active{ transform: translateY(1px); }
+  button:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .btn-add{
+    background: var(--accent-blue);
+    color: var(--paper);
+    padding: 10px 16px;
+    border-radius: 3px;
+    align-self:flex-end;
+  }
+
+  .toolbar{
+    padding-left: 30px;
+    margin-top: auto;
+    padding-top: 24px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-process{
+    background: var(--rule-red);
+    color: var(--paper);
+    padding: 11px 20px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+  }
+  .btn-clear{
+    background: transparent;
+    color: var(--ink);
+    text-decoration: underline;
+    padding: 6px 4px;
+  }
+  .status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--stamp-green);
+    min-height: 16px;
+  }
+  .status.error{ color: var(--rule-red); }
+
+  /* Right ledger page */
+  .ledger-wrap{ overflow-x:auto; }
+  table#ledgerTable{
+    border-collapse: collapse;
+    width: 100%;
+    font-family:'Inter', sans-serif;
+    font-size: 13.5px;
+  }
+  table#ledgerTable thead th{
+    font-family:'Spectral', serif;
+    font-weight:600;
+    text-align:left;
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+    background: var(--paper-dark);
+    position: sticky;
+    top:0;
+  }
+  table#ledgerTable tbody td{
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--paper-line);
+    vertical-align: top;
+  }
+  table#ledgerTable tbody td[contenteditable="true"]:focus{
+    outline: 2px solid var(--accent-blue);
+    outline-offset: -2px;
+    background: #fff;
+  }
+  table#ledgerTable tbody tr:hover{ background: rgba(166,61,47,0.06); }
+  .row-num{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--rule-red);
+    opacity:0.7;
+    font-size:12px;
+  }
+
+  .empty-ledger{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color:#8d846a;
+    padding: 20px 4px;
+    line-height:1.6;
+  }
+
+  .export-row{
+    display:flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btn-export{
+    background: var(--cover);
+    color: var(--paper);
+    padding: 9px 16px;
+    border-radius: 3px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+
+  .cat-toggle{
+    padding-left: 30px;
+    margin-top: 0;
+    display:flex;
+    align-items:center;
+  }
+  .btn-cat-toggle{
+    background: transparent;
+    color: var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 2px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-cat-toggle .arrow{
+    display:inline-block;
+    transition: transform 0.15s ease;
+    color: var(--rule-red);
+    font-size: 10px;
+  }
+  .btn-cat-toggle.open .arrow{ transform: rotate(90deg); }
+  .cat-badge{
+    background: var(--stamp-green);
+    color: var(--paper);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-family:'Inter', sans-serif;
+    letter-spacing:0;
+    text-transform:none;
+  }
+
+  .cat-section{
+    display:none;
+    padding-left: 30px;
+    margin-top: 18px;
+  }
+  .cat-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:8px;
+    min-height: 22px;
+  }
+  .cat-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background: var(--stamp-green);
+    border: 1px solid var(--stamp-green);
+    color: var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 4px 8px;
+    border-radius: 3px;
+  }
+  .cat-chip button{
+    background:none;
+    border:none;
+    color: var(--paper);
+    opacity: 0.75;
+    font-weight:700;
+    cursor:pointer;
+    padding:0;
+    font-size:13px;
+    line-height:1;
+  }
+  .cat-chip button:hover{ opacity: 1; }
+  .cat-input-row{
+    display:flex;
+    gap:8px;
+  }
+  #categoryInput{
+    flex:1;
+    font-family:'Inter', sans-serif;
+    font-size: 13px;
+    padding: 7px 8px;
+    background: transparent;
+    border: 1px solid var(--paper-line);
+    border-radius: 3px;
+    outline:none;
+    color: var(--ink);
+  }
+  #categoryInput:focus{ border-color: var(--accent-blue); }
+  .btn-cat-add{
+    background: var(--stamp-green);
+    color: var(--paper);
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size:12px;
+  }
+  .cat-hint{
+    font-family:'Inter', sans-serif;
+    font-size: 11px;
+    color:#8d846a;
+    margin-top:6px;
+  }
+
+  .page-footer-note{
+    font-family:'Inter', sans-serif;
+    font-size: 12px;
+    color: #b9c9bd;
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 26px auto;
+    line-height: 1.5;
+    padding: 0 16px;
+  }
+
+  .spinner{
+    display:inline-block;
+    width:10px; height:10px;
+    border-radius:50%;
+    background: var(--rule-red);
+    animation: pulse 0.9s ease-in-out infinite;
+    margin-right:6px;
+  }
+  @keyframes pulse{ 0%,100%{opacity:0.25;} 50%{opacity:1;} }
+</style>
+</head>
+<body>
+
+<div class="cover-bar">
+  <div class="cover-title">BlabberLedger
+    <span class="no">VOL. I &mdash; PLAINTEXT ACCOUNTS</span>
+  </div>
+  <div class="cover-sub">Say what happened in your own words. The ledger figures out the columns and posts it as a proper table.</div>
+</div>
+
+<div class="book">
+  <div class="page left">
+    <div class="section-header">Blabber</div>
+    <div class="cat-toggle">
+      <button class="btn-cat-toggle" id="catToggleBtn" onclick="toggleCategories()">
+        <span class="arrow">▶</span> Expected categories <span style="opacity:0.6; text-transform:none; letter-spacing:0;">(optional)</span> <span class="cat-badge" id="catBadge" style="display:none;"></span>
+      </button>
+    </div>
+    <div class="cat-section" id="catSection">
+      <div class="cat-chips" id="catChips"></div>
+      <div class="cat-input-row">
+        <input id="categoryInput" placeholder="e.g. Groceries" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCategory();}">
+        <button class="btn-cat-add" onclick="addCategory()">Add</button>
+      </div>
+      <div class="cat-hint">If you list categories here, the ledger will sort every entry into one of these instead of inventing its own.</div>
+    </div>
+
+    <div class="input-row">
+      <textarea id="lineInput" placeholder="e.g. I spent $45 at Hobby Lobby for candles today" onkeydown="handleKeydown(event)"></textarea>
+      <button class="btn-add" onclick="addLine()">Add</button>
+    </div>
+    <div id="chatlog"></div>
+
+    <div class="toolbar">
+      <button class="btn-clear" onclick="clearAll()">Clear notebook</button>
+      <button class="btn-process" id="processBtn" onclick="processEntries()">Organize into ledger</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="spine"></div>
+
+  <div class="page right">
+    <div class="section-header">Ledger</div>
+    <div class="ledger-wrap">
+      <table id="ledgerTable" style="display:none;">
+        <thead><tr id="ledgerHead"></tr></thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+      <div class="empty-ledger" id="emptyLedger">No entries posted yet. Add a few lines on the left, then click &ldquo;Organize into ledger.&rdquo;</div>
+    </div>
+    <div class="export-row" id="exportRow" style="display:none;">
+      <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+      <button class="btn-export" onclick="exportJSON()">Export JSON</button>
+      <button class="btn-export" onclick="exportTSV()">Export TSV (Excel paste)</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer-note">Your notebook and ledger are saved automatically and will be here next time you open this page. Export whenever you want a file to keep elsewhere.</div>
+
+<script>
+let lines = [];
+let rows = [];
+let columns = [];
+let categories = [];
+
+const STORAGE_KEY = 'ledger-state-v1';
+
+async function saveState(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify({ lines, rows, columns, categories }), false);
+  }catch(e){
+    console.error('Save failed', e);
+  }
+}
+
+async function loadState(){
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(result && result.value){
+      const state = JSON.parse(result.value);
+      lines = state.lines || [];
+      rows = state.rows || [];
+      columns = state.columns || [];
+      categories = state.categories || [];
+      if(lines.length || rows.length){
+        setStatus('Picked up where you left off.', false);
+      }
+    }
+  }catch(e){
+    // nothing saved yet for this visitor — that's fine
+  }
+  renderChatlog();
+  renderLedger();
+  renderCategories();
+}
+
+function handleKeydown(e){
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    addLine();
+  }
+}
+
+// Splits any block of text into individual entry lines, so a full paragraph
+// or a multi-line paste becomes several logged lines instead of one blob.
+function splitIntoLines(text){
+  return text
+    .split(/\r?\n+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function addLine(){
+  const input = document.getElementById('lineInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const parts = splitIntoLines(text);
+  parts.forEach(p => lines.push(p));
+  input.value = '';
+  renderChatlog();
+  saveState();
+}
+
+function setupPasteHandler(){
+  const input = document.getElementById('lineInput');
+  input.addEventListener('paste', function(e){
+    const clipboard = (e.clipboardData || window.clipboardData);
+    if(!clipboard) return;
+    const pasted = clipboard.getData('text');
+    const parts = splitIntoLines(pasted);
+    if(parts.length > 1){
+      e.preventDefault();
+      parts.forEach(p => lines.push(p));
+      renderChatlog();
+      saveState();
+    }
+    // single-line paste falls through to default textarea behavior
+  });
+}
+
+function renderChatlog(){
+  const log = document.getElementById('chatlog');
+  log.innerHTML = '';
+  lines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'entry-line';
+    const idx = document.createElement('span');
+    idx.className = 'idx';
+    idx.textContent = (i+1) + '.';
+    const txt = document.createElement('span');
+    txt.textContent = line;
+    div.appendChild(idx);
+    div.appendChild(txt);
+    log.appendChild(div);
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearAll(){
+  lines = [];
+  rows = [];
+  columns = [];
+  renderChatlog();
+  renderLedger();
+  setStatus('', false);
+  saveState();
+}
+
+function setStatus(msg, isError, showSpinner){
+  const el = document.getElementById('status');
+  el.className = 'status' + (isError ? ' error' : '');
+  el.innerHTML = (showSpinner ? '<span class="spinner"></span>' : '') + msg;
+}
+
+function toggleCategories(){
+  const section = document.getElementById('catSection');
+  const btn = document.getElementById('catToggleBtn');
+  const isOpen = section.style.display === 'block';
+  section.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+}
+
+function renderCategories(){
+  const wrap = document.getElementById('catChips');
+  wrap.innerHTML = '';
+  categories.forEach((cat, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'cat-chip';
+    const label = document.createElement('span');
+    label.textContent = cat;
+    const remove = document.createElement('button');
+    remove.textContent = '×';
+    remove.title = 'Remove category';
+    remove.onclick = () => removeCategory(i);
+    chip.appendChild(label);
+    chip.appendChild(remove);
+    wrap.appendChild(chip);
+  });
+  const badge = document.getElementById('catBadge');
+  if(categories.length){
+    badge.style.display = 'inline-block';
+    badge.textContent = categories.length;
+  }else{
+    badge.style.display = 'none';
+  }
+}
+
+function addCategory(){
+  const input = document.getElementById('categoryInput');
+  const val = input.value.trim();
+  if(!val) return;
+  if(!categories.some(c => c.toLowerCase() === val.toLowerCase())){
+    categories.push(val);
+    renderCategories();
+    saveState();
+  }
+  input.value = '';
+}
+
+function removeCategory(i){
+  categories.splice(i, 1);
+  renderCategories();
+  saveState();
+}
+
+async function processEntries(){
+  if(lines.length === 0){
+    setStatus('Add at least one line first.', true);
+    return;
+  }
+  const btn = document.getElementById('processBtn');
+  btn.disabled = true;
+  setStatus('Reading the notebook and posting entries…', false, true);
+
+  const existingCols = columns.length ? columns.join(', ') : '(none yet)';
+  const categoryClause = categories.length
+    ? `The user has defined this exact set of expected categories: ${categories.map(c => '"' + c + '"').join(', ')}. For every row's "category" field, scrutinize the wording and choose the single best-fitting category from this list — do not invent new category names. If a line genuinely mentions items spanning more than one category (e.g. "groceries and cleaning supplies" hitting both a food category and a household category), split it into separate rows, one per category, dividing the amount if the text gives enough information to do so, or duplicating the total with a note if it doesn't. Only fall back to "Other" if truly nothing on the list fits.`
+    : `Decide sensible category names yourself based on the content.`;
+
+  const systemPrompt = `You convert casual, plaintext personal notes (often about purchases, errands, or events) into structured tabular data.
+
+Rules:
+- Read ALL the numbered lines given closely. Scrutinize each one for MULTIPLE distinct transactions or events packed into a single line (e.g. "I bought groceries at Publix for $120, just food and drinks. I went to Lowes for cleaning supplies because they had a sale" is TWO separate entries: one at Publix, one at Lowes) and split those into separate row objects. Do not merge distinct stores, dates, or purposes into one row.
+- Produce one JSON object per distinct transaction/event, not per input line.
+- Decide sensible column names yourself based on the content (e.g. date, store, amount, category, item, notes). Use short, lowercase, snake_case keys.
+- Reuse the SAME set of keys across every row so the data forms a consistent table. Existing columns already in use: ${existingCols}. Reuse those keys where they fit; only introduce a new key if genuinely needed for new information, and if you do, retroactively that key should be treated as optional (use null) for rows it doesn't apply to.
+- ${categoryClause}
+- For amounts, output plain numbers (no currency symbols), as numbers not strings. If one line's total needs splitting across categories/rows and the exact split isn't stated, make a reasonable note of that in a "notes" field rather than silently guessing precise numbers.
+- If no explicit date is mentioned, omit the date key rather than guessing one.
+- Keep a "notes" or "detail" field for anything descriptive that doesn't fit a specific column.
+- Respond with ONLY a raw JSON array of objects. No markdown fences, no preamble, no explanation.`;
+
+  const userPrompt = lines.map((l, i) => (i+1) + '. ' + l).join('\n');
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [ { role: "user", content: userPrompt } ]
+      })
+    });
+
+    if(!response.ok){
+      throw new Error('API responded with status ' + response.status);
+    }
+
+    const data = await response.json();
+    const textBlock = (data.content || []).map(b => b.text || '').join('\n').trim();
+    const cleaned = textBlock.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+
+    let parsed;
+    try{
+      parsed = JSON.parse(cleaned);
+    }catch(e){
+      throw new Error('Could not read the response as JSON.');
+    }
+    if(!Array.isArray(parsed)) throw new Error('Expected a list of entries back.');
+
+    rows = parsed;
+    const colSet = new Set(columns);
+    rows.forEach(r => Object.keys(r).forEach(k => colSet.add(k)));
+    columns = Array.from(colSet);
+
+    renderLedger();
+    setStatus('Posted ' + rows.length + ' entr' + (rows.length === 1 ? 'y' : 'ies') + ' to the ledger.', false);
+    saveState();
+  }catch(err){
+    console.error(err);
+    setStatus('Could not post entries: ' + err.message, true);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function renderLedger(){
+  const table = document.getElementById('ledgerTable');
+  const head = document.getElementById('ledgerHead');
+  const body = document.getElementById('ledgerBody');
+  const empty = document.getElementById('emptyLedger');
+  const exportRow = document.getElementById('exportRow');
+
+  if(rows.length === 0){
+    table.style.display = 'none';
+    empty.style.display = 'block';
+    exportRow.style.display = 'none';
+    return;
+  }
+
+  table.style.display = 'table';
+  empty.style.display = 'none';
+  exportRow.style.display = 'flex';
+
+  head.innerHTML = '';
+  const thNum = document.createElement('th');
+  thNum.textContent = '#';
+  head.appendChild(thNum);
+  columns.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c.replace(/_/g,' ');
+    head.appendChild(th);
+  });
+
+  body.innerHTML = '';
+  rows.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    const tdNum = document.createElement('td');
+    tdNum.className = 'row-num';
+    tdNum.textContent = i+1;
+    tr.appendChild(tdNum);
+    columns.forEach(col => {
+      const td = document.createElement('td');
+      td.contentEditable = 'true';
+      const val = row[col];
+      td.textContent = (val === undefined || val === null) ? '' : val;
+      td.addEventListener('blur', () => {
+        rows[i][col] = td.textContent.trim();
+        saveState();
+      });
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function download(filename, content, mime){
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(val){
+  const s = (val === undefined || val === null) ? '' : String(val);
+  if(/[",\n]/.test(s)){
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
+}
+
+function exportCSV(){
+  if(rows.length === 0) return;
+  const lines = [columns.join(',')];
+  rows.forEach(r => {
+    lines.push(columns.map(c => csvEscape(r[c])).join(','));
+  });
+  download('ledger.csv', lines.join('\n'), 'text/csv');
+}
+
+function exportTSV(){
+  if(rows.length === 0) return;
+  const lines = [columns.join('\t')];
+  rows.forEach(r => {
+    lines.push(columns.map(c => (r[c] === undefined || r[c] === null) ? '' : String(r[c]).replace(/\t/g,' ')).join('\t'));
+  });
+  download('ledger.tsv', lines.join('\n'), 'text/tab-separated-values');
+}
+
+function exportJSON(){
+  if(rows.length === 0) return;
+  download('ledger.json', JSON.stringify(rows, null, 2), 'application/json');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setupPasteHandler();
+  loadState();
+});
+</script>
+
+</body>
+</html>
