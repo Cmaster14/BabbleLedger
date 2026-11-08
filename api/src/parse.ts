@@ -7,7 +7,7 @@ import {
   needsReview,
   type ParseRequest,
   type ParseResult,
-} from "@blabberledger/shared";
+} from "@babbleledger/shared";
 
 const DEFAULT_MODELS = {
   anthropic: "claude-haiku-5-5",

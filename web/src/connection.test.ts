@@ -44,7 +44,7 @@ test("forgetting the key (empty key) removes it even if remember was on", () => 
 
 test("an unknown stored provider falls back to the default", () => {
   const storage = memoryStorage();
-  storage.setItem("blabberledger.provider", "openai");
+  storage.setItem("babbleledger.provider", "openai");
   assert.equal(createConnectionStore(storage).load().provider, "anthropic");
 });
 

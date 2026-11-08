@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { ParsedEntry } from "@blabberledger/shared";
+import type { ParsedEntry } from "@babbleledger/shared";
 import {
   addCategory,
   addLines,

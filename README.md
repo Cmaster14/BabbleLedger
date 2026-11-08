@@ -1,4 +1,4 @@
-# BlabberLedger
+# BabbleLedger
 
 Jot down expense notes in plain English, get structured rows back, review anything uncertain, export. Local-first: no accounts, no server-side ledgers.
 
@@ -10,7 +10,7 @@ api/      Hono service with one endpoint: POST /parse (stateless)
 web/      Vite + TypeScript front end (the ledger-book UI), talks to /parse
 ```
 
-`web` and `api` both import `@blabberledger/shared`, so the schema, review rules and export formats exist in exactly one place.
+`web` and `api` both import `@babbleledger/shared`, so the schema, review rules and export formats exist in exactly one place.
 
 ## Run locally
 

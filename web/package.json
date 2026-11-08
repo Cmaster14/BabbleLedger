@@ -1,5 +1,5 @@
 {
-  "name": "@blabberledger/web",
+  "name": "@babbleledger/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "tsx --test src/*.test.ts"
   },
   "dependencies": {
-    "@blabberledger/shared": "*"
+    "@babbleledger/shared": "*"
   },
   "devDependencies": {
     "vite": "^8.3.6"
