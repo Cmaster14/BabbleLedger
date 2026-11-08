@@ -2,7 +2,7 @@ name: Deploy web
 
 # Requires: repo Settings -> Pages -> Source = "GitHub Actions", and a repository
 # variable API_URL (Settings -> Secrets and variables -> Actions -> Variables)
-# holding the deployed API's address, e.g. https://blabberledger-api.example.com
+# holding the deployed API's address, e.g. https://babbleledger-api.example.com
 
 on:
   push:

@@ -1,4 +1,4 @@
-import { PROVIDERS, type Provider } from "@blabberledger/shared";
+import { PROVIDERS, type Provider } from "@babbleledger/shared";
 
 /**
  * The user's provider choice and API key.
@@ -15,8 +15,8 @@ export interface Connection {
 
 type KV = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-const PROVIDER_KEY = "blabberledger.provider";
-const API_KEY = "blabberledger.apiKey";
+const PROVIDER_KEY = "babbleledger.provider";
+const API_KEY = "babbleledger.apiKey";
 
 export function createConnectionStore(storage: KV | null) {
   const safe = <T>(fn: (s: KV) => T, fallback: T): T => {

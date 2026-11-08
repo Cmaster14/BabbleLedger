@@ -3,7 +3,7 @@
  * nothing here ever leaves the browser. Every call fails soft (private windows,
  * blocked storage) so the app still works, it just won't remember.
  */
-const DB_NAME = "blabberledger";
+const DB_NAME = "babbleledger";
 const STORE = "kv";
 const STATE_KEY = "state-v1";
 

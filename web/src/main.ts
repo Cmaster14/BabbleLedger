@@ -1,5 +1,5 @@
 import "./style.css";
-import { PROVIDERS, toCsv, toJournal, toTsv, type Provider } from "@blabberledger/shared";
+import { PROVIDERS, toCsv, toJournal, toTsv, type Provider } from "@babbleledger/shared";
 import { ApiError, localToday, postParse } from "./api";
 import { chunkLines, chunkText } from "./batch";
 import { browserConnectionStore, type Connection } from "./connection";
@@ -526,16 +526,16 @@ function exportAs(kind: "csv" | "tsv" | "json" | "journal"): void {
   switch (kind) {
     case "csv":
       // BOM so Excel reads non-ASCII payees as UTF-8.
-      download(`blabberledger-${stamp}.csv`, "﻿" + toCsv(state.rows), "text/csv;charset=utf-8");
+      download(`babbleledger-${stamp}.csv`, "﻿" + toCsv(state.rows), "text/csv;charset=utf-8");
       break;
     case "tsv":
-      download(`blabberledger-${stamp}.tsv`, toTsv(state.rows), "text/tab-separated-values;charset=utf-8");
+      download(`babbleledger-${stamp}.tsv`, toTsv(state.rows), "text/tab-separated-values;charset=utf-8");
       break;
     case "json":
-      download(`blabberledger-${stamp}.json`, JSON.stringify(ledgerRecords(state.rows), null, 2), "application/json");
+      download(`babbleledger-${stamp}.json`, JSON.stringify(ledgerRecords(state.rows), null, 2), "application/json");
       break;
     case "journal":
-      download(`blabberledger-${stamp}.journal`, toJournal(state.rows), "text/plain;charset=utf-8");
+      download(`babbleledger-${stamp}.journal`, toJournal(state.rows), "text/plain;charset=utf-8");
       break;
   }
 }

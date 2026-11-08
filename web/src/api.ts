@@ -1,4 +1,4 @@
-import type { ParseResult, Provider } from "@blabberledger/shared";
+import type { ParseResult, Provider } from "@babbleledger/shared";
 
 export class ApiError extends Error {
   constructor(
@@ -68,7 +68,7 @@ export async function postParse(call: ParseCall): Promise<ParseResult> {
     } catch {
       // Deliberately generic: never put request details (the key) into an error.
       if (controller.signal.aborted) throw new ApiError("timeout", "The service took too long to respond. Try again.");
-      throw new ApiError("network", `Couldn't reach the BlabberLedger service at ${base}. Is it running?`);
+      throw new ApiError("network", `Couldn't reach the BabbleLedger service at ${base}. Is it running?`);
     }
 
     let data: unknown = null;

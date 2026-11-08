@@ -1,4 +1,4 @@
-# BlabberLedger
+# BabbleLedger
 
 Jot down expense notes in plain English, get structured rows back, review anything uncertain, export. Local-first: no accounts, no server-side ledgers.
 
@@ -10,7 +10,7 @@ api/      Hono service with one endpoint: POST /parse (stateless)
 web/      Vite + TypeScript front end (the ledger-book UI), talks to /parse
 ```
 
-`web` and `api` both import `@blabberledger/shared`, so the schema, review rules and export formats exist in exactly one place.
+`web` and `api` both import `@babbleledger/shared`, so the schema, review rules and export formats exist in exactly one place.
 
 ## Run locally
 
@@ -78,3 +78,13 @@ npm run build:web                # production build into web/dist
 - Default model is `claude-haiku-5-5` (cheap for short parsing, runs on the user's key). Override per request or change `DEFAULT_MODELS` in `api/src/parse.ts`. `temperature` is only sent for Google, because the Anthropic model rejects it.
 - Rate limiting is in-memory per IP, fine for a single free-tier instance. It keys on `x-forwarded-for`, so only trust it behind a proxy that sets that header.
 - **Not yet run against a real provider key.** The whole stack, including the UI, has been exercised end to end against a fake provider endpoint, which proves the wiring but says nothing about parse quality. First thing to do: run a dozen messy notes through a real key and tune `SYSTEM` in `api/src/parse.ts`.
+
+## Deploying the API to Cloudflare Workers
+
+`api/src/app.ts` holds the Hono app; `server.ts` is the Node entry for local runs and `worker.ts` is the Workers entry.
+
+- Connect the repo in Cloudflare (Workers & Pages -> Create -> Import a repository). Leave the root directory at the repo root.
+- Build command: none. Deploy command: `npx wrangler deploy --config api/wrangler.toml`.
+- Set `ALLOWED_ORIGIN` in `api/wrangler.toml` (or the Worker's Variables) to your Pages origin, e.g. `https://cmaster14.github.io`.
+- Then set the repo Actions variable `API_URL` to the Worker's URL and re-run "Deploy web".
+- The in-memory rate limit is per isolate, so add a Cloudflare rate-limiting rule for a real cap.

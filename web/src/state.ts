@@ -5,7 +5,7 @@ import {
   needsReview,
   type ParseResult,
   type ParsedEntry,
-} from "@blabberledger/shared";
+} from "@babbleledger/shared";
 
 export const EDITABLE_FIELDS = ["date", "type", "amount", "currency", "payee", "category", "memo"] as const;
 export type EditableField = (typeof EDITABLE_FIELDS)[number];
