@@ -1,0 +1,9 @@
+name = "blabberledger-api"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Front-end origin(s) allowed by CORS: origin only, no path, comma-separated.
+# Change this to your Pages origin, or override it in the dashboard under Settings -> Variables.
+[vars]
+ALLOWED_ORIGIN = "https://cmaster14.github.io"
