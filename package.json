@@ -1,0 +1,23 @@
+{
+  "name": "blabberledger",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w api",
+    "dev:web": "npm run dev -w web",
+    "build:web": "npm run build -w web",
+    "typecheck": "npm run typecheck -w shared && npm run typecheck -w api && npm run typecheck -w web",
+    "test": "npm run test -w shared && npm run test -w web"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

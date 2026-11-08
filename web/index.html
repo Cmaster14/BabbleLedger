@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BlabberLedger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="cover-bar">
+  <div class="cover-title">BlabberLedger
+    <span class="no">VOL. I &mdash; PLAINTEXT ACCOUNTS</span>
+  </div>
+  <div class="cover-sub">Say what happened in your own words. The ledger figures out the columns and posts it as a proper table.</div>
+</div>
+
+<div class="book">
+  <div class="page left">
+    <div class="section-header">Blabber</div>
+
+    <div class="cat-toggle">
+      <button class="btn-cat-toggle" id="connToggleBtn" type="button" aria-expanded="false" aria-controls="connSection">
+        <span class="arrow">▶</span> Connection <span class="dim">(your API key)</span> <span class="cat-badge" id="connBadge" style="display:none;">key set</span>
+      </button>
+    </div>
+    <div class="cat-section" id="connSection">
+      <div class="conn-row">
+        <label class="conn-label" for="providerSelect">Provider</label>
+        <select id="providerSelect" class="field">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="google">Google (Gemini)</option>
+        </select>
+      </div>
+      <div class="conn-row">
+        <label class="conn-label" for="apiKeyInput">API key</label>
+        <input id="apiKeyInput" class="field" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your own key">
+      </div>
+      <div class="conn-row conn-actions">
+        <label class="check-row"><input type="checkbox" id="rememberKey"> Remember on this device</label>
+        <button class="btn-clear" id="forgetKeyBtn" type="button">Forget key</button>
+      </div>
+      <div class="cat-hint">The key is sent with each request so the service can call your provider for you. The service doesn&rsquo;t store or log it. Unless you tick &ldquo;remember,&rdquo; it&rsquo;s forgotten when you close or reload this tab. A remembered key stays readable by anything running in this browser profile, so only remember it on a device you trust.</div>
+    </div>
+
+    <div class="cat-toggle">
+      <button class="btn-cat-toggle" id="catToggleBtn" type="button" aria-expanded="false" aria-controls="catSection">
+        <span class="arrow">▶</span> Expected categories <span class="dim">(optional)</span> <span class="cat-badge" id="catBadge" style="display:none;"></span>
+      </button>
+    </div>
+    <div class="cat-section" id="catSection">
+      <div class="cat-chips" id="catChips"></div>
+      <div class="cat-input-row">
+        <input id="categoryInput" class="field" placeholder="e.g. Groceries" maxlength="40">
+        <button class="btn-cat-add" id="catAddBtn" type="button">Add</button>
+      </div>
+      <div class="cat-hint">If you list categories here, the ledger will sort every entry into one of these instead of inventing its own. Anything that doesn&rsquo;t fit is flagged for review.</div>
+    </div>
+
+    <div class="input-row">
+      <textarea id="lineInput" placeholder="e.g. I spent $45 at Hobby Lobby for candles today" aria-label="Add a note"></textarea>
+      <button class="btn-add" id="addBtn" type="button">Add</button>
+    </div>
+    <p class="llm-notice">Notes you post are sent to your chosen AI provider (Anthropic or Google) using your own API key. Don&rsquo;t enter sensitive information such as account numbers or passwords.</p>
+    <div id="chatlog"></div>
+
+    <div class="toolbar">
+      <button class="btn-clear" id="clearNotebookBtn" type="button">Clear notebook</button>
+      <button class="btn-process" id="processBtn" type="button">Organize into ledger</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="spine"></div>
+
+  <div class="page right">
+    <div class="section-header">Ledger</div>
+    <div class="review-banner" id="reviewBanner" style="display:none;"></div>
+    <div class="ledger-wrap">
+      <table id="ledgerTable" style="display:none;">
+        <thead><tr id="ledgerHead"></tr></thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+      <div class="empty-ledger" id="emptyLedger">No entries posted yet. Add a few lines on the left, then click &ldquo;Organize into ledger.&rdquo;</div>
+    </div>
+    <div class="skipped" id="skippedBox" style="display:none;">
+      <div class="skipped-title">Not recognised as transactions</div>
+      <ul id="skippedList"></ul>
+      <button class="btn-clear" id="dismissSkippedBtn" type="button">Dismiss</button>
+    </div>
+    <div class="export-row" id="exportRow" style="display:none;">
+      <button class="btn-export" id="exportCsvBtn" type="button">Export CSV</button>
+      <button class="btn-export" id="exportTsvBtn" type="button">Export TSV (Excel paste)</button>
+      <button class="btn-export" id="exportJsonBtn" type="button">Export JSON</button>
+      <button class="btn-export" id="exportJournalBtn" type="button">Export journal (hledger)</button>
+      <button class="btn-clear" id="clearLedgerBtn" type="button">Clear ledger</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer-note">Your notebook and ledger are saved in this browser only &mdash; there are no accounts and nothing is kept on a server. Export whenever you want a file to keep elsewhere.</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
